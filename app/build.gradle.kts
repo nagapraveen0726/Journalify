@@ -9,12 +9,12 @@ plugins {
 
 android {
     namespace = "uk.ac.tees.mad.journalify"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "uk.ac.tees.mad.journalify"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 

@@ -32,16 +32,16 @@ fun NavGraph(
         // ----------------------
         composable(Routes.SPLASH) {
             SplashScreen(
-//                onNavigateAuth = {
-//                    navController.navigate(Routes.AUTH) {
-//                        popUpTo(0)
-//                    }
-//                },
-//                onNavigateHome = {
-//                    navController.navigate(Routes.HOME) {
-//                        popUpTo(0)
-//                    }
-//                }
+                goToAuth = {
+                    navController.navigate(Routes.AUTH) {
+                        popUpTo(0)
+                    }
+                },
+                goToHome = {
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(0)
+                    }
+                }
             )
         }
 
