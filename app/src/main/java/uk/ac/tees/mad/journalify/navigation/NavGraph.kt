@@ -23,7 +23,7 @@ fun NavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Routes.SPLASH,
+        startDestination = Routes.AUTH,
         modifier = modifier
     ) {
 
@@ -50,11 +50,11 @@ fun NavGraph(
         // ----------------------
         composable(Routes.AUTH) {
             AuthScreen(
-//                onAuthSuccess = {
-//                    navController.navigate(Routes.HOME) {
-//                        popUpTo(0)
-//                    }
-//                }
+                onAuthSuccess = {
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(0)
+                    }
+                }
             )
         }
 
