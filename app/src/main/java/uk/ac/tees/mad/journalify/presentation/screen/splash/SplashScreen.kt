@@ -12,12 +12,13 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import uk.ac.tees.mad.journalify.R
 import uk.ac.tees.mad.journalify.presentation.components.ScreenPreview
 
 @Composable
 fun SplashScreen(
-    viewModel: SplashViewModel? = null,
+    viewModel: SplashViewModel? = hiltViewModel(),
     goToAuth: () -> Unit = {},
     goToHome: () -> Unit = {}
 ) {
