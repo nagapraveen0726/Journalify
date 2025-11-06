@@ -7,10 +7,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import uk.ac.tees.mad.journalify.domain.repository.AuthRepository
 import javax.inject.Inject
 
 @HiltViewModel
-class AuthViewModel @Inject constructor() : ViewModel() {
+class AuthViewModel @Inject constructor(
+    private val repo: AuthRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState
@@ -70,9 +73,14 @@ class AuthViewModel @Inject constructor() : ViewModel() {
         if (!validateLogin()) return
 
         viewModelScope.launch {
-            simulateLoading()
-            onSuccess()
-            _uiState.value = _uiState.value.copy(success = true)
+            setLoading(true)
+
+            try {
+                repo.login(_uiState.value.email, _uiState.value.password)
+                setSuccess(onSuccess)
+            } catch (e: Exception) {
+                setError(e)
+            }
         }
     }
 
@@ -80,29 +88,56 @@ class AuthViewModel @Inject constructor() : ViewModel() {
         if (!validateSignup()) return
 
         viewModelScope.launch {
-            simulateLoading()
-            onSuccess()
-            _uiState.value = _uiState.value.copy(success = true)
+            setLoading(true)
+
+            try {
+                repo.signup(_uiState.value.email, _uiState.value.password)
+                setSuccess(onSuccess)
+            } catch (e: Exception) {
+                setError(e)
+            }
         }
     }
 
     fun submitReset(onSuccess: () -> Unit) {
-        val state = _uiState.value
-        if (!state.email.contains("@")) {
-            _uiState.value = state.copy(emailError = "Invalid email")
-            return
-        }
+        val email = _uiState.value.email
+        if (!email.contains("@")) return
 
         viewModelScope.launch {
-            simulateLoading()
-            onSuccess()
-            _uiState.value = state.copy(success = true)
+            setLoading(true)
+
+            try {
+                repo.reset(email)
+                setSuccess(onSuccess)
+            } catch (e: Exception) {
+                setError(e)
+            }
         }
     }
 
-    private suspend fun simulateLoading() {
-        _uiState.value = _uiState.value.copy(loading = true)
-        delay(1200)
-        _uiState.value = _uiState.value.copy(loading = false)
+    private fun setError(e: Throwable) {
+        _uiState.value = _uiState.value.copy(
+            loading = false,
+            emailError = readableError(e)
+        )
     }
+
+    private fun readableError(e: Throwable): String {
+        return e.message ?: "Unknown error"
+    }
+
+    private fun setSuccess(onSuccess: () -> Unit) {
+        _uiState.value = _uiState.value.copy(loading = false, success = true)
+        onSuccess()
+    }
+
+    private fun setLoading(v: Boolean) {
+        _uiState.value = _uiState.value.copy(loading = v)
+    }
+
+//    private suspend fun setLoading() {
+//        _uiState.value = _uiState.value.copy(loading = true)
+//        delay(1200)
+//        _uiState.value = _uiState.value.copy(loading = false)
+//    }
 }

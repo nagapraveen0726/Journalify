@@ -1,6 +1,7 @@
 package uk.ac.tees.mad.journalify.di
 
 import android.content.Context
+import com.google.android.gms.auth.api.Auth
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
 import dagger.Module
@@ -9,7 +10,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.Dispatchers
+import uk.ac.tees.mad.journalify.data.repository.AuthRepositoryImpl
 import uk.ac.tees.mad.journalify.data.session.SessionManager
+import uk.ac.tees.mad.journalify.domain.repository.AuthRepository
 import uk.ac.tees.mad.journalify.util.ConnectivityObserver
 import uk.ac.tees.mad.journalify.util.NetworkConnectivityObserver
 import javax.inject.Singleton
@@ -51,4 +54,10 @@ object AppModule {
 
     @Provides
     fun provideDispatcherMain() = Dispatchers.Main
+
+    @Provides
+    @Singleton
+    fun provideAuthRepository(
+        auth: FirebaseAuth
+    ): AuthRepository = AuthRepositoryImpl(auth)
 }

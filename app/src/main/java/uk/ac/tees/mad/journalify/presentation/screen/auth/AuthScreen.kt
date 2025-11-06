@@ -23,11 +23,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import uk.ac.tees.mad.journalify.presentation.components.ScreenPreview
 
 @Composable
 fun AuthScreen(
-    viewModel: AuthViewModel = AuthViewModel(),
+    viewModel: AuthViewModel = hiltViewModel(),
     onAuthSuccess: () -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsState()
