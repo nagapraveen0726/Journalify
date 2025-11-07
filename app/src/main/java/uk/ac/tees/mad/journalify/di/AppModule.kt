@@ -1,7 +1,7 @@
 package uk.ac.tees.mad.journalify.di
 
 import android.content.Context
-import com.google.android.gms.auth.api.Auth
+import androidx.room.Room
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
 import dagger.Module
@@ -10,9 +10,13 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.Dispatchers
+import uk.ac.tees.mad.journalify.data.local.AppDatabase
+import uk.ac.tees.mad.journalify.data.local.dao.JournalEntryDao
 import uk.ac.tees.mad.journalify.data.repository.AuthRepositoryImpl
+import uk.ac.tees.mad.journalify.data.repository.LocalJournalRepositoryImpl
 import uk.ac.tees.mad.journalify.data.session.SessionManager
 import uk.ac.tees.mad.journalify.domain.repository.AuthRepository
+import uk.ac.tees.mad.journalify.domain.repository.LocalJournalRepository
 import uk.ac.tees.mad.journalify.util.ConnectivityObserver
 import uk.ac.tees.mad.journalify.util.NetworkConnectivityObserver
 import javax.inject.Singleton
@@ -60,4 +64,23 @@ object AppModule {
     fun provideAuthRepository(
         auth: FirebaseAuth
     ): AuthRepository = AuthRepositoryImpl(auth)
+
+    @Provides
+    @Singleton
+    fun provideDb(@ApplicationContext ctx: Context): AppDatabase =
+        Room.databaseBuilder(
+            ctx,
+            AppDatabase::class.java,
+            "journalify.db"
+        ).build()
+
+    @Provides
+    fun provideJournalDao(db: AppDatabase): JournalEntryDao =
+        db.journalEntryDao()
+
+    @Provides
+    @Singleton
+    fun provideLocalRepo(
+        dao: JournalEntryDao
+    ): LocalJournalRepository = LocalJournalRepositoryImpl(dao)
 }
