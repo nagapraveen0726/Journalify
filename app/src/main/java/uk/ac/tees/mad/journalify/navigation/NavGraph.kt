@@ -11,6 +11,7 @@ import androidx.navigation.navArgument
 import uk.ac.tees.mad.journalify.presentation.screen.auth.AuthScreen
 import uk.ac.tees.mad.journalify.presentation.screen.entry.DetailEntryScreen
 import uk.ac.tees.mad.journalify.presentation.screen.entry.EditEntryScreen
+import uk.ac.tees.mad.journalify.presentation.screen.entry.create_entry.CreateEntryScreen
 import uk.ac.tees.mad.journalify.presentation.screen.home.HomeScreen
 import uk.ac.tees.mad.journalify.presentation.screen.settings.SettingsScreen
 import uk.ac.tees.mad.journalify.presentation.screen.splash.SplashScreen
@@ -63,15 +64,15 @@ fun NavGraph(
         // ----------------------
         composable(Routes.HOME) {
             HomeScreen(
-//                onCreateEntry = {
-//                    navController.navigate(Routes.CREATE_ENTRY)
-//                },
-//                onOpenEntry = { id ->
-//                    navController.navigate("detail_entry/$id")
-//                },
-//                onOpenSettings = {
-//                    navController.navigate(Routes.SETTINGS)
-//                }
+                onCreateEntry = {
+                    navController.navigate(Routes.CREATE_ENTRY)
+                },
+                onOpenEntry = { id ->
+                    navController.navigate("detail_entry/$id")
+                },
+                onOpenSettings = {
+                    navController.navigate(Routes.SETTINGS)
+                }
             )
         }
 
@@ -79,9 +80,12 @@ fun NavGraph(
         //    CREATE ENTRY
         // ----------------------
         composable(Routes.CREATE_ENTRY) {
-//            CreateEntryScreen(
-//                onBack = { navController.popBackStack() }
-//            )
+            CreateEntryScreen(
+                onBack = { navController.popBackStack() },
+                onSaved = {
+                    navController.popBackStack()   // return to Home
+                }
+            )
         }
 
         // ----------------------
