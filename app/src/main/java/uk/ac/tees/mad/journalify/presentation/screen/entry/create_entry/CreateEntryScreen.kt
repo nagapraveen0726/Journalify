@@ -2,12 +2,28 @@ package uk.ac.tees.mad.journalify.presentation.screen.entry.create_entry
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -21,9 +37,15 @@ import uk.ac.tees.mad.journalify.presentation.components.ScreenPreview
 fun CreateEntryScreen(
     viewModel: CreateEntryViewModel = hiltViewModel(),
     onBack: () -> Unit = {},
-    onSaved: () -> Unit = {}
+    onSaved: () -> Unit = {},
+    onAddImage: () -> Unit = {},
+    imagePath: String?
 ) {
     val ui by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(imagePath) {
+        imagePath?.let { viewModel.updateImage(it) }
+    }
 
     Scaffold(topBar = {
         TopAppBar(title = { Text("New Entry") }, navigationIcon = {
@@ -77,8 +99,8 @@ fun CreateEntryScreen(
 
             OutlinedButton(
                 onClick = {
-                    // CameraX will update this in commit 12
                     viewModel.updateImage(null)
+                    onAddImage()
                 }, modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(Icons.Default.Add, null)
@@ -97,9 +119,7 @@ fun CreateEntryScreen(
 @Composable
 fun CreateEntryPreview() {
     ScreenPreview {
-        CreateEntryScreen(
-//            viewModel = FakeCreateVM()
-        )
+        CreateEntryScreen(imagePath = "")
     }
 }
 

@@ -1,6 +1,12 @@
 package uk.ac.tees.mad.journalify.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -11,12 +17,14 @@ import androidx.navigation.navArgument
 import uk.ac.tees.mad.journalify.presentation.screen.auth.AuthScreen
 import uk.ac.tees.mad.journalify.presentation.screen.entry.DetailEntryScreen
 import uk.ac.tees.mad.journalify.presentation.screen.entry.EditEntryScreen
+import uk.ac.tees.mad.journalify.presentation.screen.camera.CameraCaptureScreen
 import uk.ac.tees.mad.journalify.presentation.screen.entry.create_entry.CreateEntryScreen
 import uk.ac.tees.mad.journalify.presentation.screen.home.HomeScreen
 import uk.ac.tees.mad.journalify.presentation.screen.settings.SettingsScreen
 import uk.ac.tees.mad.journalify.presentation.screen.splash.SplashScreen
 
 
+@RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun NavGraph(
     modifier: Modifier = Modifier,
@@ -80,11 +88,19 @@ fun NavGraph(
         //    CREATE ENTRY
         // ----------------------
         composable(Routes.CREATE_ENTRY) {
+            val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+            val image by savedStateHandle
+                ?.getStateFlow<String?>("image", null)
+                ?.collectAsState()
+                ?: remember { mutableStateOf(null) }
+
             CreateEntryScreen(
                 onBack = { navController.popBackStack() },
                 onSaved = {
                     navController.popBackStack()   // return to Home
-                }
+                },
+                onAddImage = { navController.navigate(Routes.CAMERA) },
+                imagePath = image
             )
         }
 
@@ -127,5 +143,24 @@ fun NavGraph(
 //                onBack = { navController.popBackStack() }
             )
         }
+
+        // ----------------------
+        //    CAMERA SCREEN
+        // ----------------------
+        composable(Routes.CAMERA) {
+            CameraCaptureScreen(
+                onCaptured = { path ->
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("image", path)
+
+                    navController.popBackStack()
+                },
+                onCancel = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
     }
 }
