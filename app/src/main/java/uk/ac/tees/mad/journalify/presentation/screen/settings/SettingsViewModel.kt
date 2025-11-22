@@ -25,10 +25,10 @@ class SettingsViewModel @Inject constructor(
     private fun load() {
         viewModelScope.launch {
             val name = session.userId.first() ?: ""
-            val bio = session.biometricEnabled.first()
+//            val bio = session.biometricEnabled.first()
             _ui.value = _ui.value.copy(
                 displayName = name,
-                biometricEnabled = bio
+//                biometricEnabled = bio
             )
         }
     }

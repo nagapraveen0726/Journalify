@@ -2,17 +2,20 @@ package uk.ac.tees.mad.journalify.presentation.screen.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import uk.ac.tees.mad.journalify.data.session.SessionManager
 import uk.ac.tees.mad.journalify.domain.repository.AuthRepository
 import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val repo: AuthRepository
+    private val repo: AuthRepository,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AuthUiState())
@@ -127,6 +130,10 @@ class AuthViewModel @Inject constructor(
     }
 
     private fun setSuccess(onSuccess: () -> Unit) {
+        val uid = repo.currentUid() ?: return
+        viewModelScope.launch {
+            sessionManager.setSession(uid)
+        }
         _uiState.value = _uiState.value.copy(loading = false, success = true)
         onSuccess()
     }

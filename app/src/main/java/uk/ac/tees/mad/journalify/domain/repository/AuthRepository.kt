@@ -4,4 +4,5 @@ interface AuthRepository {
     suspend fun login(email: String, password: String)
     suspend fun signup(email: String, password: String)
     suspend fun reset(email: String)
+    fun currentUid(): String?
 }

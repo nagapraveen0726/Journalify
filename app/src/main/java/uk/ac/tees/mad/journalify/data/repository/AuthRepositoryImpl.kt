@@ -20,4 +20,7 @@ class AuthRepositoryImpl @Inject constructor(
         auth.sendPasswordResetEmail(email).await()
     }
 
+    override fun currentUid(): String? {
+        return auth.currentUser?.uid
+    }
 }

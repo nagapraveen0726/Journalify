@@ -3,6 +3,7 @@ package uk.ac.tees.mad.journalify.di
 import android.content.Context
 import androidx.room.Room
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import dagger.Module
 import dagger.Provides
@@ -12,11 +13,13 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.Dispatchers
 import uk.ac.tees.mad.journalify.data.local.AppDatabase
 import uk.ac.tees.mad.journalify.data.local.dao.JournalEntryDao
+import uk.ac.tees.mad.journalify.data.remote.RemoteJournalRepositoryImpl
 import uk.ac.tees.mad.journalify.data.repository.AuthRepositoryImpl
 import uk.ac.tees.mad.journalify.data.repository.LocalJournalRepositoryImpl
 import uk.ac.tees.mad.journalify.data.session.SessionManager
 import uk.ac.tees.mad.journalify.domain.repository.AuthRepository
 import uk.ac.tees.mad.journalify.domain.repository.LocalJournalRepository
+import uk.ac.tees.mad.journalify.domain.repository.RemoteJournalRepository
 import uk.ac.tees.mad.journalify.util.ConnectivityObserver
 import uk.ac.tees.mad.journalify.util.NetworkConnectivityObserver
 import javax.inject.Singleton
@@ -30,9 +33,9 @@ object AppModule {
     @Provides
     fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
 
-//    @Singleton
-//    @Provides
-//    fun provideFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
+    @Singleton
+    @Provides
+    fun provideFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
 
     @Singleton
     @Provides
@@ -83,4 +86,11 @@ object AppModule {
     fun provideLocalRepo(
         dao: JournalEntryDao
     ): LocalJournalRepository = LocalJournalRepositoryImpl(dao)
+
+    @Provides
+    @Singleton
+    fun provideRemoteJournalRepository(
+        auth: FirebaseAuth,
+        store: FirebaseFirestore
+    ): RemoteJournalRepository = RemoteJournalRepositoryImpl(auth, store)
 }

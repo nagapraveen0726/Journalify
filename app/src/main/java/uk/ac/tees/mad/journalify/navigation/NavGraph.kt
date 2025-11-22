@@ -32,7 +32,7 @@ fun NavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Routes.AUTH,
+        startDestination = Routes.SPLASH,
         modifier = modifier
     ) {
 

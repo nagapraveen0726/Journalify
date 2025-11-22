@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "835525183806",
-    "project_id": "journalify-e1b36",
-    "storage_bucket": "journalify-e1b36.firebasestorage.app"
+    "project_number": "360981923714",
+    "project_id": "journalify-5c2de",
+    "storage_bucket": "journalify-5c2de.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:835525183806:android:966996468d596f915b446f",
+        "mobilesdk_app_id": "1:360981923714:android:cdc7349dd67702efa2f19b",
         "android_client_info": {
           "package_name": "uk.ac.tees.mad.journalify"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCbH5msEs6LPEN8cBLi8m8d7dkH-Cmlv1o"
+          "current_key": "AIzaSyC58HymmQCnOMOAYa8p0fctBeEqsNs3bhM"
         }
       ],
       "services": {
