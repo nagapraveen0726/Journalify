@@ -140,7 +140,12 @@ fun NavGraph(
         // ----------------------
         composable(Routes.SETTINGS) {
             SettingsScreen(
-//                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onLoggedOut = {
+                    navController.navigate(Routes.AUTH) {
+                        popUpTo(0)
+                    }
+                }
             )
         }
 

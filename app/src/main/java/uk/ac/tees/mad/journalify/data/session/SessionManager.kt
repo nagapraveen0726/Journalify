@@ -34,4 +34,5 @@ class SessionManager(private val context: Context) {
             it.clear()
         }
     }
+
 }
