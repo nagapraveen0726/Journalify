@@ -3,16 +3,19 @@ package uk.ac.tees.mad.journalify.presentation.screen.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import uk.ac.tees.mad.journalify.domain.usecase.GetEntriesUseCase
 import uk.ac.tees.mad.journalify.domain.usecase.SearchEntriesUseCase
+import uk.ac.tees.mad.journalify.domain.usecase.SyncPullUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getEntries: GetEntriesUseCase,
-    private val searchEntries: SearchEntriesUseCase
+    private val searchEntries: SearchEntriesUseCase,
+    private val syncPull: SyncPullUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -45,6 +48,13 @@ class HomeViewModel @Inject constructor(
             searchEntries(value).collect { list ->
                 _uiState.value = _uiState.value.copy(entries = list)
             }
+        }
+    }
+
+    fun syncFromCloud() {
+        viewModelScope.launch {
+            syncPull()
+//            refresh()
         }
     }
 }

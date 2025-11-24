@@ -112,16 +112,3 @@ fun CreateEntryScreen(
         }
     }
 }
-
-
-// PREVIEW
-@Preview
-@Composable
-fun CreateEntryPreview() {
-    ScreenPreview {
-        CreateEntryScreen(imagePath = "")
-    }
-}
-
-//class FakeCreateVM : CreateEntryViewModel(
-//    createEntry = { _, _, _ -> })

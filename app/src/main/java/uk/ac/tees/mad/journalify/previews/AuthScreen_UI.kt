@@ -1,38 +1,38 @@
-package uk.ac.tees.mad.journalify.presentation.screen.auth
+package uk.ac.tees.mad.journalify.previews
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import uk.ac.tees.mad.journalify.presentation.components.ScreenPreview
+import uk.ac.tees.mad.journalify.presentation.screen.auth.AuthMode
 
 @Composable
-fun AuthScreen(
-    viewModel: AuthViewModel = hiltViewModel(),
-    onAuthSuccess: () -> Unit = {}
+fun AuthScreen_UI(
+    mode: AuthMode = AuthMode.LOGIN,
+    email: String = "",
+    password: String = "",
+    confirmPassword: String = "",
+    emailError: String? = null,
+    passwordError: String? = null,
+    confirmPasswordError: String? = null,
+    loading: Boolean = false,
+    onModeChange: (AuthMode) -> Unit = {},
+    onEmailChange: (String) -> Unit = {},
+    onPasswordChange: (String) -> Unit = {},
+    onConfirmPasswordChange: (String) -> Unit = {},
+    onSubmitClick: () -> Unit = {}
 ) {
-    val state by viewModel.uiState.collectAsState()
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -46,11 +46,11 @@ fun AuthScreen(
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            AuthMode.values().forEach { mode ->
+            AuthMode.values().forEach { m ->
                 Text(
-                    text = mode.name,
-                    color = if (state.mode == mode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.clickable { viewModel.switchMode(mode) }
+                    text = m.name,
+                    color = if (mode == m) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.clickable { onModeChange(m) }
                 )
             }
         }
@@ -58,12 +58,12 @@ fun AuthScreen(
 
         // EMAIL
         OutlinedTextField(
-            value = state.email,
-            onValueChange = viewModel::updateEmail,
+            value = email,
+            onValueChange = onEmailChange,
             label = { Text("Email") },
-            isError = state.emailError != null,
+            isError = emailError != null,
             supportingText = {
-                state.emailError?.let {
+                emailError?.let {
                     Text(
                         it,
                         color = MaterialTheme.colorScheme.error
@@ -75,15 +75,15 @@ fun AuthScreen(
         Spacer(Modifier.height(16.dp))
 
         // PASSWORD
-        if (state.mode != AuthMode.RESET) {
+        if (mode != AuthMode.RESET) {
             OutlinedTextField(
-                value = state.password,
-                onValueChange = viewModel::updatePassword,
+                value = password,
+                onValueChange = onPasswordChange,
                 label = { Text("Password") },
                 visualTransformation = PasswordVisualTransformation(),
-                isError = state.passwordError != null,
+                isError = passwordError != null,
                 supportingText = {
-                    state.passwordError?.let {
+                    passwordError?.let {
                         Text(
                             it,
                             color = MaterialTheme.colorScheme.error
@@ -96,15 +96,15 @@ fun AuthScreen(
         }
 
         // CONFIRM PASSWORD (signup only)
-        if (state.mode == AuthMode.SIGNUP) {
+        if (mode == AuthMode.SIGNUP) {
             OutlinedTextField(
-                value = state.confirmPassword,
-                onValueChange = viewModel::updateConfirmPassword,
+                value = confirmPassword,
+                onValueChange = onConfirmPasswordChange,
                 label = { Text("Confirm Password") },
                 visualTransformation = PasswordVisualTransformation(),
-                isError = state.confirmPasswordError != null,
+                isError = confirmPasswordError != null,
                 supportingText = {
-                    state.confirmPasswordError?.let {
+                    confirmPasswordError?.let {
                         Text(
                             it,
                             color = MaterialTheme.colorScheme.error
@@ -118,41 +118,40 @@ fun AuthScreen(
 
         // BUTTONS
         Button(
-            onClick = {
-                when (state.mode) {
-                    AuthMode.LOGIN -> viewModel.submitLogin(onAuthSuccess)
-                    AuthMode.SIGNUP -> viewModel.submitSignup(onAuthSuccess)
-                    AuthMode.RESET -> viewModel.submitReset(onAuthSuccess)
-                }
-            },
+            onClick = onSubmitClick,
             modifier = Modifier.fillMaxWidth(),
-            enabled = !state.loading
+            enabled = !loading
         ) {
             Text(
-                text =
-                    when (state.mode) {
-                        AuthMode.LOGIN -> "Login"
-                        AuthMode.SIGNUP -> "Sign Up"
-                        AuthMode.RESET -> "Reset Password"
-                    }
+                text = when (mode) {
+                    AuthMode.LOGIN -> "Login"
+                    AuthMode.SIGNUP -> "Sign Up"
+                    AuthMode.RESET -> "Reset Password"
+                }
             )
         }
 
         Spacer(Modifier.height(16.dp))
 
-        if (state.loading) {
+        if (loading) {
             CircularProgressIndicator()
         }
 
         // SWITCH TO RESET PASSWORD
-        if (state.mode == AuthMode.LOGIN) {
+        if (mode == AuthMode.LOGIN) {
             Text(
                 "Forgot password?",
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable { viewModel.switchMode(AuthMode.RESET) }
+                modifier = Modifier.clickable { onModeChange(AuthMode.RESET) }
             )
         }
     }
 }
 
-
+@Preview(showBackground = true)
+@Composable
+fun AuthScreenPreview() {
+    ScreenPreview {
+        AuthScreen_UI()
+    }
+}
