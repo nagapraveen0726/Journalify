@@ -24,4 +24,8 @@ interface JournalEntryDao {
 
     @Query("SELECT * FROM journal_entries WHERE title LIKE '%' || :query || '%' OR content LIKE '%' || :query || '%' ORDER BY createdAt DESC")
     fun search(query: String): Flow<List<JournalEntryEntity>>
+
+    @Query("SELECT * FROM journal_entries WHERE isSynced = 0")
+    fun getUnsynced(): Flow<List<JournalEntryEntity>>
+
 }

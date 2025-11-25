@@ -12,4 +12,5 @@ interface LocalJournalRepository {
     fun getAll(): Flow<List<JournalEntry>>
     fun getById(id: String): Flow<JournalEntry?>
     fun search(query: String): Flow<List<JournalEntry>>
+    fun getUnsynced(): Flow<List<JournalEntry>>
 }

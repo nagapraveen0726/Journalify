@@ -9,13 +9,15 @@ import kotlinx.coroutines.launch
 import uk.ac.tees.mad.journalify.domain.usecase.GetEntriesUseCase
 import uk.ac.tees.mad.journalify.domain.usecase.SearchEntriesUseCase
 import uk.ac.tees.mad.journalify.domain.usecase.SyncPullUseCase
+import uk.ac.tees.mad.journalify.domain.usecase.SyncPushUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getEntries: GetEntriesUseCase,
     private val searchEntries: SearchEntriesUseCase,
-    private val syncPull: SyncPullUseCase
+    private val syncPull: SyncPullUseCase,
+    private val syncPush: SyncPushUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -57,4 +59,11 @@ class HomeViewModel @Inject constructor(
 //            refresh()
         }
     }
+
+    fun syncToCloud() {
+        viewModelScope.launch {
+            syncPush()
+        }
+    }
+
 }

@@ -33,4 +33,7 @@ class LocalJournalRepositoryImpl @Inject constructor(
 
     override fun search(query: String): Flow<List<JournalEntry>> =
         dao.search(query).map { it.map { e -> e.toDomain() } }
+
+    override fun getUnsynced(): Flow<List<JournalEntry>> =
+        dao.getUnsynced().map { list -> list.map { it.toDomain() } }
 }

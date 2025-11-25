@@ -2,6 +2,7 @@ package uk.ac.tees.mad.journalify.di
 
 import android.content.Context
 import androidx.room.Room
+import com.cloudinary.Cloudinary
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -36,10 +37,6 @@ object AppModule {
     @Singleton
     @Provides
     fun provideFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
-
-    @Singleton
-    @Provides
-    fun provideFirebaseStorage(): FirebaseStorage = FirebaseStorage.getInstance()
 
     // Session Manager (DataStore)
     @Singleton
@@ -93,4 +90,17 @@ object AppModule {
         auth: FirebaseAuth,
         store: FirebaseFirestore
     ): RemoteJournalRepository = RemoteJournalRepositoryImpl(auth, store)
+
+    @Provides
+    @Singleton
+    fun provideCloudinary(): Cloudinary {
+        return Cloudinary(
+            mapOf(
+                "cloud_name" to "dmgwqrc5b",
+                "api_key" to "176314437958328",
+                "api_secret" to "Vd4ZdDCK8P7NidAmCy0N5VMndA8"
+            )
+        )
+    }
+
 }
