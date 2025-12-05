@@ -4,9 +4,9 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -15,10 +15,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import uk.ac.tees.mad.journalify.presentation.screen.auth.AuthScreen
-import uk.ac.tees.mad.journalify.presentation.screen.entry.DetailEntryScreen
-import uk.ac.tees.mad.journalify.presentation.screen.entry.EditEntryScreen
 import uk.ac.tees.mad.journalify.presentation.screen.camera.CameraCaptureScreen
 import uk.ac.tees.mad.journalify.presentation.screen.entry.create_entry.CreateEntryScreen
+import uk.ac.tees.mad.journalify.presentation.screen.entry.edit_entry.EditEntryScreen
 import uk.ac.tees.mad.journalify.presentation.screen.home.HomeScreen
 import uk.ac.tees.mad.journalify.presentation.screen.settings.SettingsScreen
 import uk.ac.tees.mad.journalify.presentation.screen.splash.SplashScreen
@@ -113,8 +112,8 @@ fun NavGraph(
         ) { backStack ->
             val id = backStack.arguments?.getString("entryId") ?: ""
             EditEntryScreen(
-//                entryId = id,
-//                onBack = { navController.popBackStack() }
+                id = id,
+                onBack = { navController.popBackStack() }
             )
         }
 
@@ -126,13 +125,13 @@ fun NavGraph(
             arguments = listOf(navArgument("entryId") { type = NavType.StringType })
         ) { backStack ->
             val id = backStack.arguments?.getString("entryId") ?: ""
-            DetailEntryScreen(
-//                entryId = id,
-//                onBack = { navController.popBackStack() },
-//                onEdit = {
-//                    navController.navigate("edit_entry/$id")
-//                }
-            )
+//            DetailEntryScreen(
+////                entryId = id,
+////                onBack = { navController.popBackStack() },
+////                onEdit = {
+////                    navController.navigate("edit_entry/$id")
+////                }
+//            )
         }
 
         // ----------------------
