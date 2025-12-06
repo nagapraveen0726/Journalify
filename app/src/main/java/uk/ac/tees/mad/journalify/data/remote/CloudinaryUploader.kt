@@ -28,4 +28,13 @@ class CloudinaryUploader @Inject constructor(
             result["secure_url"] as String
         }
     }
+
+    suspend fun delete(entryId: String) {
+        withContext(Dispatchers.IO) {
+            cloud.uploader().destroy(
+                "journalify/$entryId",
+                ObjectUtils.emptyMap()
+            )
+        }
+    }
 }

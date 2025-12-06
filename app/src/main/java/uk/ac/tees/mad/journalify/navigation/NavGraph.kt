@@ -17,6 +17,7 @@ import androidx.navigation.navArgument
 import uk.ac.tees.mad.journalify.presentation.screen.auth.AuthScreen
 import uk.ac.tees.mad.journalify.presentation.screen.camera.CameraCaptureScreen
 import uk.ac.tees.mad.journalify.presentation.screen.entry.create_entry.CreateEntryScreen
+import uk.ac.tees.mad.journalify.presentation.screen.entry.detail_entry.DetailEntryScreen
 import uk.ac.tees.mad.journalify.presentation.screen.entry.edit_entry.EditEntryScreen
 import uk.ac.tees.mad.journalify.presentation.screen.home.HomeScreen
 import uk.ac.tees.mad.journalify.presentation.screen.settings.SettingsScreen
@@ -122,16 +123,16 @@ fun NavGraph(
         // ----------------------
         composable(
             route = "detail_entry/{entryId}",
-            arguments = listOf(navArgument("entryId") { type = NavType.StringType })
+//            arguments = listOf(navArgument("entryId") { type = NavType.StringType })
         ) { backStack ->
             val id = backStack.arguments?.getString("entryId") ?: ""
-//            DetailEntryScreen(
-////                entryId = id,
-////                onBack = { navController.popBackStack() },
-////                onEdit = {
-////                    navController.navigate("edit_entry/$id")
-////                }
-//            )
+            DetailEntryScreen(
+                id = id,
+                onBack = { navController.popBackStack() },
+                onEdit = {
+                    navController.navigate("edit_entry/$id")
+                }
+            )
         }
 
         // ----------------------

@@ -9,6 +9,7 @@ data class JournalEntryEntity(
     val title: String,
     val content: String,
     val imagePath: String?,
+    val imageUrl: String?,
     val createdAt: Long,
     val updatedAt: Long,
     val isSynced: Boolean

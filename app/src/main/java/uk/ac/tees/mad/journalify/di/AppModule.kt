@@ -5,7 +5,6 @@ import androidx.room.Room
 import com.cloudinary.Cloudinary
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -72,7 +71,9 @@ object AppModule {
             ctx,
             AppDatabase::class.java,
             "journalify.db"
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
 
     @Provides
     fun provideJournalDao(db: AppDatabase): JournalEntryDao =

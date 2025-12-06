@@ -7,7 +7,7 @@ import uk.ac.tees.mad.journalify.data.local.entity.JournalEntryEntity
 
 @Database(
     entities = [JournalEntryEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
