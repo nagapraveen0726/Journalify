@@ -1,4 +1,4 @@
-package uk.ac.tees.mad.journalify.previews
+package uk.ac.tees.mad.journalify.presentation.previews
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

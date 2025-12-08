@@ -1,4 +1,4 @@
-package uk.ac.tees.mad.journalify.previews
+package uk.ac.tees.mad.journalify.presentation.previews
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -11,7 +11,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import uk.ac.tees.mad.journalify.presentation.components.RichTextEditor
 import uk.ac.tees.mad.journalify.presentation.components.ScreenPreview
