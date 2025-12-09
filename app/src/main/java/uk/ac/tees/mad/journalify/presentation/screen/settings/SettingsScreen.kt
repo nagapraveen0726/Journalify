@@ -2,44 +2,26 @@ package uk.ac.tees.mad.journalify.presentation.screen.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.graphics.Color
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.ui.text.font.FontWeight
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import uk.ac.tees.mad.journalify.presentation.components.ScreenPreview
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,8 +32,22 @@ fun SettingsScreen(
     onLoggedOut: () -> Unit = {}
 ) {
     val ui by viewModel.ui.collectAsState()
-    val scrollState = rememberScrollState()
-    var showLogoutDialog = remember { mutableStateOf(false) }
+    val working by viewModel.working.collectAsState()
+    val scroll = rememberScrollState()
+
+    // display name editing state (local only)
+    var editingName by remember { mutableStateOf(false) }
+    var nameDraft by remember { mutableStateOf("") }
+
+    // avatar dialog state
+    var showAvatarDialog by remember { mutableStateOf(false) }
+    var showLogoutDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(ui.displayName) {
+        if (!editingName) {
+            nameDraft = ui.displayName
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -59,295 +55,235 @@ fun SettingsScreen(
                 title = { Text("Settings") },
                 navigationIcon = {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack,
+                        Icons.Default.ArrowBack,
                         contentDescription = "Back",
                         modifier = Modifier
-                            .padding(12.dp)
-                            .clickable(onClick = onBack)
+                            .padding(8.dp)
+                            .clickable { onBack() }
                     )
                 }
             )
         }
-    ) { paddingValues ->
+    ) { pad ->
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-//                .padding(paddingValues)
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(pad)
         ) {
 
             Column(
                 modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize()
-                    .verticalScroll(scrollState)
-                    .padding(horizontal = 12.dp, vertical = 16.dp)
+                    .verticalScroll(scroll)
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
             ) {
-
-                if (ui.isSaving) {
-                    LinearProgressIndicator(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp)
-                    )
+                if (working) {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
 
                 // Account section
-                SectionTitle(text = "Account")
-
-                AvatarRow(
-                    displayName = ui.displayName,
-                    onClick = { viewModel.onAvatarClick() }
-                )
-
+                Text("Account", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                 Spacer(Modifier.height(12.dp))
 
-                Text(
-                    text = "Display name",
-                    style = MaterialTheme.typography.labelLarge
-                )
+                // Avatar row
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showAvatarDialog = true }
+                        .padding(vertical = 8.dp)
+                ) {
+                    if (ui.avatar != null && ui.avatar!!.isNotBlank()) {
+                        AsyncImage(
+                            model = ui.avatar,
+                            contentDescription = "Avatar",
+                            modifier = Modifier
+                                .size(64.dp)
+                                .clip(CircleShape)
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .size(64.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primaryContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = ui.displayName.trim().firstOrNull()?.uppercase() ?: "?",
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                        }
+                    }
 
-                Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier.width(12.dp))
 
-                OutlinedTextField(
-                    value = ui.displayName,
-                    onValueChange = viewModel::updateDisplayName,
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Display name", style = MaterialTheme.typography.bodyLarge)
+                        if (!editingName) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(ui.displayName.ifBlank { "Set your name" }, style = MaterialTheme.typography.bodyMedium)
+                                Spacer(Modifier.width(8.dp))
+                                Icon(
+                                    Icons.Default.Edit,
+                                    contentDescription = "Edit",
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                        .clickable {
+                                            editingName = true
+                                            nameDraft = ui.displayName
+                                        }
+                                )
+                            }
+                        } else {
+                            // Edit mode: text field + save/cancel
+                            OutlinedTextField(
+                                value = nameDraft,
+                                onValueChange = { nameDraft = it },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
 
-                Spacer(Modifier.height(24.dp))
+                            Row(modifier = Modifier.padding(top = 8.dp)) {
+                                Button(onClick = {
+                                    // Save
+                                    viewModel.saveDisplayName(nameDraft)
+                                    editingName = false
+                                }) {
+                                    Icon(Icons.Default.Done, contentDescription = null)
+                                    Spacer(Modifier.width(8.dp))
+                                    Text("Save")
+                                }
+                                Spacer(Modifier.width(8.dp))
+                                OutlinedButton(onClick = {
+                                    editingName = false
+                                    nameDraft = ui.displayName
+                                }) {
+                                    Icon(Icons.Default.Close, contentDescription = null)
+                                    Spacer(Modifier.width(8.dp))
+                                    Text("Cancel")
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(20.dp))
 
                 // Personalization
-                SectionTitle(text = "Personalization")
+                Text("Personalization", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                Spacer(Modifier.height(12.dp))
 
-                SettingsSwitchRow(
-                    title = "Dark theme",
-                    description = "Use dark appearance for the app",
-                    checked = ui.themeDark,
-                    onCheckedChange = viewModel::updateTheme
-                )
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Dark theme", style = MaterialTheme.typography.bodyLarge)
+                        Text("Use dark appearance for the app", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Switch(checked = ui.themeDark, onCheckedChange = { viewModel.updateTheme(it) })
+                }
 
-//            Spacer(Modifier.height(24.dp))
-//
-//            // Security
-//            SectionTitle(text = "Security")
-//
-//            SettingsSwitchRow(
-//                title = "Biometric unlock",
-//                description = "Unlock the app using fingerprint / face",
-//                checked = ui.biometricEnabled,
-//                onCheckedChange = viewModel::updateBiometric
-//            )
-
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(20.dp))
 
                 // Sync & storage
-                SectionTitle(text = "Sync & storage")
+                Text("Sync & storage", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                Spacer(Modifier.height(12.dp))
 
-                SettingsSwitchRow(
-                    title = "Auto-sync",
-                    description = "Automatically sync your data in the background",
-                    checked = ui.autoSync,
-                    onCheckedChange = viewModel::updateAutoSync
-                )
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Auto-sync", style = MaterialTheme.typography.bodyLarge)
+                        Text("Automatically sync your data in the background", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Switch(checked = ui.autoSync, onCheckedChange = { viewModel.updateAutoSync(it) })
+                }
 
                 Spacer(Modifier.height(12.dp))
 
-                StorageUsageRow(
-                    storageUsage = ui.storageUsage,
-                    onRefresh = { viewModel.refreshStorageUsage() }
-                )
+                // Storage usage row
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Storage usage", style = MaterialTheme.typography.bodyLarge)
+                        Text(if (ui.storageUsage.isBlank()) "Tap refresh to calculate" else ui.storageUsage, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    TextButton(onClick = { viewModel.refreshStorageUsage() }) { Text("Refresh") }
+                }
 
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(8.dp))
 
-                TextButton(
-                    onClick = { viewModel.clearCachedImages() },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                Button(onClick = { viewModel.clearCachedImages() }, modifier = Modifier.fillMaxWidth()) {
                     Text("Clear cached images")
                 }
 
-                Spacer(Modifier.height(32.dp))
-
-                // Session
-//            SectionTitle(text = "Session")
-
+                Spacer(Modifier.height(40.dp))
             }
+
+            // Logout button anchored to bottom
             Button(
-                onClick = { showLogoutDialog.value = true },
+                onClick = { showLogoutDialog = true },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 24.dp)
-                    .fillMaxWidth(0.85f)
+                    .padding(20.dp)
+                    .fillMaxWidth(0.9f)
             ) {
                 Text("Logout")
             }
 
-//            Spacer(Modifier.height(16.dp))
-
-            if (showLogoutDialog.value) {
+            // Avatar dialog (simple local-only actions)
+            if (showAvatarDialog) {
                 AlertDialog(
-                    onDismissRequest = { showLogoutDialog.value = false },
-                    title = { Text("Logout") },
-                    text = { Text("Are you sure you want to logout and clear your session?") },
+                    onDismissRequest = { showAvatarDialog = false },
+                    title = { Text("Avatar") },
+                    text = { Text("Change or remove avatar (local only). Implement gallery picker to choose a file.") },
                     confirmButton = {
-                        TextButton(
-                            onClick = {
-                                showLogoutDialog.value = false
-                                viewModel.logout(onLoggedOut)
-                            }
-                        ) {
-                            Text("Logout")
-                        }
+                        TextButton(onClick = {
+                            // here we'd normally open a gallery picker via activity result
+                            // for now we just close the dialog (UI will use viewModel.onAvatarClick to signal)
+                            viewModel.onAvatarClick()
+                            showAvatarDialog = false
+                        }) { Text("Pick (not implemented)") }
                     },
                     dismissButton = {
-                        TextButton(
-                            onClick = { showLogoutDialog.value = false }
-                        ) {
-                            Text("Cancel")
-                        }
+                        TextButton(onClick = {
+                            // remove avatar
+                            viewModel.setAvatar(null)
+                            showAvatarDialog = false
+                        }) { Text("Remove") }
                     }
                 )
             }
 
-        }
-
-    }
-}
-
-@Composable
- fun SectionTitle(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleMedium
-    )
-}
-
-@Composable
- fun AvatarRow(
-    displayName: String,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .size(56.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primaryContainer),
-            contentAlignment = Alignment.Center
-        ) {
-            val initials = displayName.trim()
-                .takeIf { it.isNotEmpty() }
-                ?.first()
-                ?.uppercase()
-                ?: "?"
-
-            Text(
-                text = initials,
-                style = MaterialTheme.typography.titleLarge
-            )
-        }
-
-        Spacer(Modifier.width(16.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = "Avatar",
-                style = MaterialTheme.typography.bodyLarge
-            )
-//            Text(
-//                text = "Tap to change picture",
-//                style = MaterialTheme.typography.bodySmall,
-//                color = MaterialTheme.colorScheme.onSurfaceVariant
-//            )
-        }
-    }
-}
-
-@Composable
- fun SettingsSwitchRow(
-    title: String,
-    description: String?,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge
-            )
-            if (description != null) {
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+            // Logout confirmation
+            if (showLogoutDialog) {
+                AlertDialog(
+                    onDismissRequest = { showLogoutDialog = false },
+                    title = { Text("Logout") },
+                    text = { Text("Are you sure you want to logout and clear your session?") },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            showLogoutDialog = false
+                            viewModel.logout {
+                                onLoggedOut()
+                            }
+                        }) {
+                            Text("Logout")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showLogoutDialog = false }) { Text("Cancel") }
+                    }
                 )
             }
         }
-
-        Spacer(Modifier.width(12.dp))
-
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange
-        )
     }
 }
 
-@Composable
-fun StorageUsageRow(
-    storageUsage: String,
-    onRefresh: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = "Storage usage",
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Spacer(Modifier.height(2.dp))
-            Text(
-                text = if (storageUsage.isBlank()) "Tap refresh to calculate" else storageUsage,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        TextButton(onClick = onRefresh) {
-            Text("Refresh")
-        }
-    }
-}
-
-@Composable
 @Preview(showBackground = true)
+@Composable
 fun SettingsScreenPreview() {
     ScreenPreview {
         SettingsScreen(
-//            viewModel = object : SettingsViewModel(
-//                session = object : uk.ac.tees.mad.journalify.data.session.SessionManager(
-//                    context = android.app.Application()
-//                ) {}
-//            ) {} // You can ignore this in your real project; Hilt will provide the VM.
+//            viewModel = SettingsViewModel(session = object : uk.ac.tees.mad.journalify.data.session.SessionManager(
+//                context = androidx.compose.ui.platform.LocalContext.current.applicationContext as android.content.Context
+//            ) {})
         )
     }
 }
