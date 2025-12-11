@@ -9,11 +9,11 @@ class AuthRepositoryImpl @Inject constructor(
     private val auth: FirebaseAuth
 ) : AuthRepository {
     override suspend fun login(email: String, password: String) {
-        auth.signInWithEmailAndPassword(email, password)
+        auth.signInWithEmailAndPassword(email, password).await()
     }
 
     override suspend fun signup(email: String, password: String) {
-        auth.createUserWithEmailAndPassword(email, password)
+        auth.createUserWithEmailAndPassword(email, password).await()
     }
 
     override suspend fun reset(email: String) {

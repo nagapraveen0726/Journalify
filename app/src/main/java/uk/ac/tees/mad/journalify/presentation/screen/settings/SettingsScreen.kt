@@ -78,7 +78,7 @@ fun SettingsScreen(
             ) {
                 if (working) {
                     LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                    Spacer(modifier = Modifier.height(12.dp))
+//                    Spacer(modifier = Modifier.height(12.dp))
                 }
 
                 // Account section

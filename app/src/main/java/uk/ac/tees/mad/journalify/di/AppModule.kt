@@ -13,6 +13,7 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.Dispatchers
 import uk.ac.tees.mad.journalify.data.local.AppDatabase
 import uk.ac.tees.mad.journalify.data.local.dao.JournalEntryDao
+import uk.ac.tees.mad.journalify.data.remote.CloudinaryUploader
 import uk.ac.tees.mad.journalify.data.remote.RemoteJournalRepositoryImpl
 import uk.ac.tees.mad.journalify.data.repository.AuthRepositoryImpl
 import uk.ac.tees.mad.journalify.data.repository.LocalJournalRepositoryImpl
@@ -97,11 +98,19 @@ object AppModule {
     fun provideCloudinary(): Cloudinary {
         return Cloudinary(
             mapOf(
-                "cloud_name" to "dmgwqrc5b",
-                "api_key" to "176314437958328",
-                "api_secret" to "Vd4ZdDCK8P7NidAmCy0N5VMndA8"
+                "cloud_name" to "dgu9vjh9e",
+                "api_key" to "157749892125913",
+                "api_secret" to "_ez-TP7YRD0QL5JD2NYS063J5aY"
             )
         )
     }
 
+    @Provides
+    @Singleton
+    fun provideCloudinaryUploader(
+        cloudinary: Cloudinary,
+        @ApplicationContext context: Context
+    ): CloudinaryUploader {
+        return CloudinaryUploader(cloudinary, context)
+    }
 }

@@ -14,7 +14,7 @@ class CreateEntryUseCase @Inject constructor(
     suspend operator fun invoke(
         title: String,
         content: String,
-        imagePath: String?
+        imageUrl: String?  // Change parameter name to imageUrl
     ) {
         val now = System.currentTimeMillis()
 
@@ -22,10 +22,11 @@ class CreateEntryUseCase @Inject constructor(
             id = UUID.randomUUID().toString(),
             title = title,
             content = content,
-            imagePath = imagePath,
+            imagePath = null,        // No local path
+            imageUrl = imageUrl,     // Store Cloudinary URL here
             createdAt = now,
             updatedAt = now,
-            isSynced = false
+            isSynced = true          // Already synced since we upload before saving
         )
 
         local.insert(entry)
@@ -35,7 +36,7 @@ class CreateEntryUseCase @Inject constructor(
                 id = entry.id,
                 title = entry.title,
                 content = entry.content,
-                imageUrl = entry.imagePath,
+                imageUrl = entry.imageUrl,  // Use imageUrl field
                 createdAt = entry.createdAt,
                 updatedAt = entry.updatedAt
             )

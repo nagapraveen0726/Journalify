@@ -1,6 +1,8 @@
 package uk.ac.tees.mad.journalify.presentation.screen.home
 
+import android.util.Log
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,9 +31,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import formatText
+import uk.ac.tees.mad.journalify.domain.model.JournalEntry
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,96 +50,137 @@ fun HomeScreen(
 
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = { onCreateEntry() }) {
-                Icon(Icons.Default.Add, null)
+            FloatingActionButton(onClick = onCreateEntry) {
+                Icon(Icons.Default.Add, contentDescription = "New entry")
             }
         },
         topBar = {
             TopAppBar(
                 title = { Text("Journalify") },
                 actions = {
-                    Text(
-                        "Settings",
-                        modifier = Modifier
-                            .padding(end = 12.dp)
-                            .clickable { onOpenSettings() }
-                    )
-                    Text(
-                        "Sync",
-                        modifier = Modifier
-                            .padding(end = 12.dp)
-                            .clickable { viewModel.syncFromCloud() }
-                    )
-                    Text(
-                        "Upload",
-                        modifier = Modifier
-                            .padding(end = 12.dp)
-                            .clickable { viewModel.syncToCloud() }
-                    )
+                    TopBarAction("Settings", onOpenSettings)
+                    TopBarAction("Sync") { viewModel.syncFromCloud() }
+                    TopBarAction("Upload") { viewModel.syncToCloud() }
                 }
             )
         }
-    ) { pv ->
+    ) { padding ->
 
         Column(
             modifier = Modifier
-                .padding(pv)
-                .padding(horizontal = 12.dp)
+                .padding(padding)
+                .padding(horizontal = 16.dp)
         ) {
 
             OutlinedTextField(
                 value = ui.query,
                 onValueChange = viewModel::search,
-                placeholder = { Text("Search...") },
-                modifier = Modifier.fillMaxWidth()
+                placeholder = { Text("Search entries") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
             )
+
             Spacer(Modifier.height(16.dp))
 
-            if (ui.isLoading)
-                CircularProgressIndicator()
-            else if (ui.entries.isEmpty())
-                Text("No entries yet...")
-            else
-                LazyColumn {
-                    items(ui.entries) { e ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onOpenEntry(e.id) }
-                                .padding(vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-
-                            val img = e.imageUrl ?: e.imagePath
-                            if (!img.isNullOrBlank()) {
-                                AsyncImage(
-                                    model = img,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(54.dp)
-                                        .clip(MaterialTheme.shapes.medium)
-                                )
-
-                                Spacer(Modifier.width(12.dp))
-                            }
-
-                            Column(
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Text(
-                                    e.title,
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                                Text(
-                                    text = e.content.take(40) + "…",
-                                    maxLines = 1,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-                        }
-                        Divider()
+            when {
+                ui.isLoading -> {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
                     }
                 }
+
+                ui.entries.isEmpty() -> {
+                    Text(
+                        text = "No entries yet",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 24.dp)
+                    )
+                }
+
+                else -> {
+                    LazyColumn {
+                        items(ui.entries) { entry ->
+                            EntryRow(
+                                entry = entry,
+                                onClick = { onOpenEntry(entry.id) }
+                            )
+                            Divider()
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TopBarAction(
+    label: String,
+    onClick: () -> Unit
+) {
+    Text(
+        text = label,
+        style = MaterialTheme.typography.bodyMedium,
+        modifier = Modifier
+            .padding(horizontal = 12.dp)
+            .clickable(onClick = onClick)
+    )
+}
+
+@Composable
+private fun EntryRow(
+    entry: JournalEntry,
+    onClick: () -> Unit
+) {
+    val previewText = formatText(entry.content)
+    val image = entry.imagePath ?: entry.imageUrl
+
+    // 🔍 DEBUG: Log the values
+    Log.d("EntryRow", "Entry: ${entry.id}")
+    Log.d("EntryRow", "imagePath: ${entry.imagePath}")
+    Log.d("EntryRow", "imageUrl: ${entry.imageUrl}")
+    Log.d("EntryRow", "Final image: $image")
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        if (!image.isNullOrBlank()) {
+            AsyncImage(
+                model = image,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(MaterialTheme.shapes.medium)
+            )
+            Spacer(Modifier.width(12.dp))
+        }
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = entry.title,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(Modifier.height(4.dp))
+
+            Text(
+                text = previewText,
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import formatText
 import uk.ac.tees.mad.journalify.util.formatTime
 import java.text.SimpleDateFormat
 import java.util.*
@@ -128,8 +129,9 @@ fun DetailEntryScreen(
                     Spacer(Modifier.height(18.dp))
                 }
 
+                val content= formatText(entry.content)
                 Text(
-                    entry.content,
+                    content,
                     style = MaterialTheme.typography.bodyLarge
                 )
 
